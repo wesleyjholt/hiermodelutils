@@ -1,0 +1,21 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "hiermodelutils"
+version = "0.1.0"
+description = "Data processing utilities for hierarchical modeling."
+readme = "README.md"
+keywords = ["hierarchical modeling", "data processing", "utilities"]
+license = {file = "LICENSE"}
+authors = [{name = "Wesley Holt", email = "holtw@purdue.edu"}]
+urls = {name = "Homepage", url = "https://github.com/wesleyjholt/hiermodelutils"}
+
+[tool.hatch.build]
+include = ["hiermodelutils/*"]
+
+[tool.pytest.ini_options]
+addopts = [
+    "--import-mode=importlib",
+]
