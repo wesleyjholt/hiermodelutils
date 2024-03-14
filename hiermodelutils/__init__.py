@@ -9,4 +9,4 @@ __author__ = 'Wesley Holt'
 # __credits__ = 'Purdue University, School of Mechanical Engineering'
 
 from ._hierarchical_dataset import *
-from ._full_factorial import *
+from ._poly_basis import *
