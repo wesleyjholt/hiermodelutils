@@ -10,7 +10,13 @@ from jaxtyping import Float, Int
 from dataclasses import dataclass
 from functools import partial
 
-# How to handle replicates in the tabular dataframe (if there is no "replicates" identifier)? 
+# TODO: Think about a way to group many categories that are not necessarily hierarchical - they are at the same level. 
+# Like gender and race. Would probably need to create a way to represent combinations of attributes.
+# IDEA: Each element in the attributes tuple could itself be a tuple of attribute categories. The different elements
+# in the outer tuple would then represent LAYERS, not just attributes. This would allow one to mix and match hierarchical
+# and same-layer attribute separation.
+
+# TODO: How to handle replicates in the tabular dataframe (if there is no "replicates" identifier)? 
 # Strategy: Make each data value a tuple containing the replicates
 # If there are more than one response variable, and there are two rows with all the same attributes values,
 # but the responses are (1, None) and (None, 1), then we can't tell if these two entries belong to the same
@@ -126,7 +132,7 @@ class HierarchicalDataset:
     
     From these, we can uniquely express the data in every other supported form (e.g., tabular, hierarchical dict, hierarchical arrays)
     """
-    data: OrderedDict
+    data: list[OrderedDict]
     attribute_names: list[str]
     response_names: list[str]
     attribute_fill_value: Optional[list] = None
