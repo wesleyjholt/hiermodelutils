@@ -20,8 +20,7 @@ __all__ = ["Parameter",
            "stochasticmodel", 
            "draw_sample",
            "draw_sample_and_get_path",
-           "draw_sample_and_update_model",
-           "set_all_model_parameters_from_samples"]
+           "draw_sample_and_update_model"]
 
 import jax.numpy as jnp
 import jax.random as jr
