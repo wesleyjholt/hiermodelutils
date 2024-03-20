@@ -49,16 +49,16 @@ def stochasticmodel(name: str):
         class StochasticModel(cls):
             """A generic class for stochastic models (in the likelihood)."""
             name: str
-            samples: Optional[dict[str, Array]]
+            # samples: Optional[dict[str, Array]]
             def __init__(
                 self, 
                 *args, 
-                samples: Optional[dict] = None, 
+                # samples: Optional[dict] = None, 
                 **kwargs
             ):
                 super().__init__(*args, **kwargs)
                 self.name = name
-                self.samples = samples
+                # self.samples = samples
 
             def __call__(
                 self, 
@@ -68,10 +68,10 @@ def stochasticmodel(name: str):
                 **kwargs
             ):
                 # TODO: Remove samples kwarg from __call__ method. This same functionality can be achieved with numpyro's Predictive class.
-                if self.samples is not None:
-                    full_name = self.name if suffix is None else f'{self.name}_{suffix}'
-                    if full_name in self.samples:
-                        return self.samples[full_name]
+                # if self.samples is not None:
+                #     full_name = self.name if suffix is None else f'{self.name}_{suffix}'
+                #     if full_name in self.samples:
+                #         return self.samples[full_name]
                 name = self.name if suffix is None else f"{self.name}_{suffix}"
                 distribution = super().get_distribution(*args, **kwargs)
                 return numpyro.sample(name, distribution, obs=obs)
