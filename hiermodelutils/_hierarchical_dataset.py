@@ -24,7 +24,7 @@ from functools import partial
 # is called "infer_replicates". Default is True.
 
 def _infer_dtype_from_example(example):
-    pandas_dtype = pd.api.types.infer_dtype(example)
+    pandas_dtype = pd.api.types.infer_dtype(pd.Series(example))
     if pandas_dtype == 'floating':
         return float
     elif pandas_dtype == 'integer':
@@ -190,7 +190,7 @@ class HierarchicalDataset:
             for i_attr in range(len(self.attribute_names)):  # Iterate through each attribute
                 if fixed_attribute_categories[i_attr] is not None:
                     # Here, we put in the user-specified categories
-                    categories[i_data].append(list(categories[i_attr]))
+                    categories[i_data].append(list(fixed_attribute_categories[i_attr]))
                 elif i_attr < share_attribute_categories_to_depth:
                     # Here, we put in the shared categories (across all datasets)
                     categories[i_data].append(list(np.unique(np.hstack([[k[i_attr] for k in data_.keys()] for data_ in self.data]))))
@@ -282,11 +282,12 @@ class HierarchicalDataset:
                         # NOTE:
                         #   - k = response_name
                         #   - v = replicate for response_name
-                        tmp.update({k: v})
+                        if not np.isnan(v):
+                            # TODO: Remove other values based on a null_value argument
+                            tmp.update({k: v})
                     group_responses_all_explicit_rep += (tmp,)
                 hier_repr_explicit_rep[group_attributes] = group_responses_all_explicit_rep
             
-            # TODO: Remove NaNs (and other values based on a null_value argument)
             data_reformatted.append(hier_repr_explicit_rep)
         return cls(data_reformatted, attribute_names, response_names, **kwargs)
         # data_hierarchical = cls._nest_data_recursive(OrderedDict(), data, attribute_names)
@@ -384,8 +385,9 @@ class HierarchicalDataset:
         n_d = len(self.data)
         n_a = len(self.attribute_names) + 1
         n_r = len(self.response_names)
-        attribute_arrays = [[] for _ in range(n_d)]
-        response_arrays = [{} for _ in range(n_d)]
+        attribute_arrays = [OrderedDict() for _ in range(n_d)]
+        # attribute_arrays = [[] for _ in range(n_d)]
+        response_arrays = [OrderedDict() for _ in range(n_d)]
         for i, d in enumerate(self.data):
             attr_main_lists, attr_mask_lists, resp_main_lists, resp_mask_lists = \
                 self._get_hierarchical_lists_recursive(
@@ -399,9 +401,15 @@ class HierarchicalDataset:
                     len(self.attribute_names)
                 )
             for j, main, mask in zip(range(n_a), attr_main_lists, attr_mask_lists):
-                attribute_arrays[i].append(
+                if j < n_a - 1:
+                    attr_name = self.attribute_names[j]
+                else:
+                    attr_name = 'replicate'
+                attribute_arrays[i][attr_name] = \
                     np.ma.array(main, mask=mask, fill_value=self.attribute_fill_values[j], dtype=self.attribute_dtypes[j])
-                )
+                # attribute_arrays[i].append(
+                #     np.ma.array(main, mask=mask, fill_value=self.attribute_fill_values[j], dtype=self.attribute_dtypes[j])
+                # )
             for j, main, mask in zip(range(n_r), resp_main_lists, resp_mask_lists):
                 response_arrays[i][self.response_names[j]] = \
                     np.ma.array(main, mask=mask, fill_value=self.response_fill_values[j], dtype=self.response_dtypes[j])
