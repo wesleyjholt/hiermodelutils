@@ -10,7 +10,7 @@ This is the intended pattern to follow:
     returns that parameter.
 """
 
-__all__ = ["HyperParameter", "get_hyperparameter_and_path", "get_hyperparameter_and_update_model"]
+__all__ = ["HyperParameter", "get_hyperparameter_and_path", "get_hyperparameter_and_update_model", "default_names"]
 
 import equinox as eqx
 import numpyro
