@@ -36,7 +36,7 @@ def get_hyperparameter_and_path(
     :param type: dict[str, HyperParameter]
     """
     param = all_hyperparams[name]
-    if param.is_stochastic:
+    if param.stochastic_fn is not None:
         return numpyro.sample(name, param.stochastic_fn, **kwargs), param.path
     else:
         return numpyro.param(name, **kwargs), param.path
