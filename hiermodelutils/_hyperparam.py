@@ -59,3 +59,34 @@ def get_hyperparameter_and_update_model(
     val, path = get_hyperparameter_and_path(name, all_hyperparams, **kwargs)
     model = eqx.tree_at(path, model, val)
     return model
+
+def default_names(names: str | tuple[str]):
+    """Decorator for giving a model a default name set.
+    
+    :param names: The default names for the outputs of the stochastic model.
+    :type name: str
+    """
+
+    def model_with_default_names(cls):
+        """Constructs a stochastic model with default names.
+        
+        :param cls: The class to be decorated.
+        :type cls: class
+        """
+    
+        class ModelWithDefaultNames(cls):
+            """A stochastic model with default names for its outputs."""
+            names: tuple[str]
+
+            def __init__(self, *args, **kwargs):
+                super().__init__(*args, **kwargs)
+                self.names = names
+            
+            def __call__(self, *args, names: Optional[str] = None, **kwargs):
+                if names is None:
+                    names = self.names
+                return super().__call__(*args, names=names, **kwargs)
+
+        return type(cls.__name__, (ModelWithDefaultNames,), {})
+
+    return model_with_default_names
