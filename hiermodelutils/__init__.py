@@ -10,4 +10,6 @@ __author__ = 'Wesley Holt'
 
 from ._datastructures import *
 from ._hyperparam import *
-from ._poly_basis import *
+from ._distributions import *
+from ._plotting import *
+from ._flatten import *

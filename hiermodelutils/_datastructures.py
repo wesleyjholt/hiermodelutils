@@ -5,6 +5,7 @@ from copy import copy
 import numpy as np
 import pandas as pd
 import jax.tree_util as jtu
+
 from typing import Callable, Union, Optional
 from jaxtyping import Float, Int
 from dataclasses import dataclass
@@ -15,6 +16,9 @@ from functools import partial
 # IDEA: Each element in the attributes tuple could itself be a tuple of attribute categories. The different elements
 # in the outer tuple would then represent LAYERS, not just attributes. This would allow one to mix and match hierarchical
 # and same-layer attribute separation.
+
+# SOLUTION: I think we just leave this up to the user to handle. It is straightforward to use pandas functions to combine columns. 
+# Perhaps provide some helper functions to do so... or just an example.
 
 # TODO: How to handle replicates in the tabular dataframe (if there is no "replicates" identifier)? 
 # Strategy: Make each data value a tuple containing the replicates

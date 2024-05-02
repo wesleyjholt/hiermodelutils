@@ -10,18 +10,31 @@ This is the intended pattern to follow:
     returns that parameter.
 """
 
-__all__ = ["HyperParameter", "get_hyperparameter_and_path", "get_hyperparameter_and_update_model", "default_names"]
+__all__ = ["HyperParameter", "get_path", "get_hyperparameter_and_path", "get_hyperparameter_and_update_model", "default_names"]
 
 import equinox as eqx
 import numpyro
 import numpyro.distributions as dist
-from typing import NamedTuple, Optional
-from jaxtyping import PyTree
+from typing import NamedTuple, Optional, Union
+from jaxtyping import PyTree, Float, Array
 
 class HyperParameter(NamedTuple):
     """Container for storing information about a hyperparameter in a model."""
     path: callable
-    stochastic_fn: Optional[dist.Distribution] = None
+    is_stochastic: bool
+    fn: Optional[dist.Distribution] = None
+    init_value: Optional[Union[Array, callable]] = None
+
+def get_path(
+    name: str,
+    all_hyperparams: dict[str, HyperParameter]
+):
+    """Retrieves a hyperparameter's path.
+    
+    :param path: The path to retrieve.
+    :type path: str
+    """
+    return all_hyperparams[name].path
 
 def get_hyperparameter_and_path(
     name: str,
@@ -36,10 +49,13 @@ def get_hyperparameter_and_path(
     :param type: dict[str, HyperParameter]
     """
     param = all_hyperparams[name]
-    if param.stochastic_fn is not None:
-        return numpyro.sample(name, param.stochastic_fn, **kwargs), param.path
+    if 'suffix' in kwargs:
+        suffix = kwargs.pop('suffix')
+        name = f"{name}_{suffix}"
+    if param.is_stochastic:
+        return numpyro.sample(name, param.fn, **kwargs), param.path
     else:
-        return numpyro.param(name, **kwargs), param.path
+        return numpyro.param(name, param.init_value, **kwargs), param.path
 
 def get_hyperparameter_and_update_model(
     name: str,
