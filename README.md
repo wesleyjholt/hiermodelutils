@@ -8,7 +8,7 @@ In a nutshell, this package is a hodgepodge collection of useful utilities for..
 - *...doing **vectorized** computations with **missing data** efficiently.*
 - *...and other random stuff (custom defined Numpyro distributions, probability density function visualization, etc.).*
 
-While there is a focus on supporting compatibility with Numpyro's API, most of the utilities are agnostic to the underlying probabilistic programming framework.
+While the focus is on supporting compatibility with Numpyro's API, most of the utilities are actually agnostic to the underlying probabilistic programming framework.
 
 ### Examples
 - TODO: Add examples

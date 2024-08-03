@@ -2,7 +2,7 @@
 
 This is the intended pattern to follow:
 - A full hierarchical model is made up of a collection of (potentially nested) callable pytrees (e.g., equinox models).
-- The hyperparameters (i.e., things that don't depend on any upstream parameters) are stored as attributes in the
+- The parameters (i.e., things that don't depend on any upstream parameters) are stored as attributes in the
     equinox models.
 - The parameters (i.e., things that do depend on upstream values) are everything else that is included in the 
     equinox models' methods.
@@ -10,7 +10,7 @@ This is the intended pattern to follow:
     returns that parameter.
 """
 
-__all__ = ["HyperParameter", "get_path", "get_hyperparameter_and_path", "get_hyperparameter_and_update_model", "default_names"]
+__all__ = ["Parameter", "get_path", "get_parameter_and_path", "get_parameter_and_update_model", "default_names"]
 
 import equinox as eqx
 import numpyro
@@ -18,37 +18,38 @@ import numpyro.distributions as dist
 from typing import NamedTuple, Optional, Union
 from jaxtyping import PyTree, Float, Array
 
-class HyperParameter(NamedTuple):
-    """Container for storing information about a hyperparameter in a model."""
+class Parameter(NamedTuple):
+    """Container for storing information about a parameter in a model."""
     path: callable
     is_stochastic: bool
+    is_learnable: bool = True
     fn: Optional[dist.Distribution] = None
-    init_value: Optional[Union[Array, callable]] = None
+    value: Optional[Union[Array, callable]] = None
 
 def get_path(
     name: str,
-    all_hyperparams: dict[str, HyperParameter]
+    all_params: dict[str, Parameter]
 ):
-    """Retrieves a hyperparameter's path.
+    """Retrieves a parameter's path.
     
     :param path: The path to retrieve.
     :type path: str
     """
-    return all_hyperparams[name].path
+    return all_params[name].path
 
-def get_hyperparameter_and_path(
+def get_parameter_and_path(
     name: str,
-    all_hyperparams: dict[str, HyperParameter],
+    all_params: dict[str, Parameter],
     **kwargs
 ):
-    """Retrieves/samples a hyperparameter from a dictionary of hyperparameters.
+    """Retrieves/samples a parameter from a dictionary of parameters.
     
-    :param name: The name of the hyperparameter.
+    :param name: The name of the parameter.
     :param type: str
-    :param all_hyperparams: The dictionary of all hyperparameters.
-    :param type: dict[str, HyperParameter]
+    :param all_params: The dictionary of all parameters.
+    :param type: dict[str, Parameter]
     """
-    param = all_hyperparams[name]
+    param = all_params[name]
     if 'suffix' in kwargs:
         suffix = kwargs.pop('suffix')
         name = f"{name}_{suffix}"
@@ -57,22 +58,22 @@ def get_hyperparameter_and_path(
     else:
         return numpyro.param(name, param.init_value, **kwargs), param.path
 
-def get_hyperparameter_and_update_model(
+def get_parameter_and_update_model(
     name: str,
     model: PyTree,
-    all_hyperparams: dict[str, HyperParameter],
+    all_params: dict[str, Parameter],
     **kwargs
 ):
-    """Retrieves/samples a hyperparameter from a dictionary of hyperparameters and stores it in the model.
+    """Retrieves/samples a parameter from a dictionary of parameters and stores it in the model.
     
-    :param name: The name of the hyperparameter.
+    :param name: The name of the parameter.
     :param type: str
     :param model: The model to update.
     :param type: PyTree
-    :param all_hyperparams: The dictionary of all hyperparameters.
-    :param type: dict[str, HyperParameter]
+    :param all_params: The dictionary of all parameters.
+    :param type: dict[str, Parameter]
     """
-    val, path = get_hyperparameter_and_path(name, all_hyperparams, **kwargs)
+    val, path = get_parameter_and_path(name, all_params, **kwargs)
     model = eqx.tree_at(path, model, val)
     return model
 

@@ -9,7 +9,7 @@ __author__ = 'Wesley Holt'
 # __credits__ = 'Purdue University, School of Mechanical Engineering'
 
 from ._datastructures import *
-from ._hyperparam import *
+from ._param import *
 from ._distributions import *
 from ._plotting import *
 from ._flatten import *
