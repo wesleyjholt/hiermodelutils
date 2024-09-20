@@ -4,18 +4,63 @@ build-backend = "hatchling.build"
 
 [project]
 name = "hiermodelutils"
-version = "0.1.0"
-description = "Data processing utilities for hierarchical modeling."
+dynamic = ["version"]
+description = 'Data processing utilities for hierarchical modeling.'
 readme = "README.md"
-keywords = ["hierarchical modeling", "data processing", "utilities"]
-license = {file = "LICENSE"}
-authors = [{name = "Wesley Holt", email = "holtw@purdue.edu"}]
-urls = {name = "Homepage", url = "https://github.com/wesleyjholt/hiermodelutils"}
+requires-python = ">=3.8"
+license = "MIT"
+keywords = []
+authors = [
+  { name = "Wesley Holt", email = "wesleyjholt@gmail.com" },
+]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Programming Language :: Python",
+  "Programming Language :: Python :: 3.8",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: Implementation :: CPython",
+  "Programming Language :: Python :: Implementation :: PyPy",
+]
+dependencies = [
+    "numpyro",
+    "equinox",
+    "pandas",
+    "seaborn"
+]
 
-[tool.hatch.build]
-include = ["hiermodelutils/*"]
+[project.urls]
+Documentation = "https://github.com/Wesley Holt/hiermodelutils#readme"
+Issues = "https://github.com/Wesley Holt/hiermodelutils/issues"
+Source = "https://github.com/Wesley Holt/hiermodelutils"
 
-[tool.pytest.ini_options]
-addopts = [
-    "--import-mode=importlib",
+[tool.hatch.version]
+path = "src/hiermodelutils/__about__.py"
+
+[tool.hatch.envs.types]
+extra-dependencies = [
+  "mypy>=1.0.0",
+]
+[tool.hatch.envs.types.scripts]
+check = "mypy --install-types --non-interactive {args:src/hiermodelutils tests}"
+
+[tool.coverage.run]
+source_pkgs = ["hiermodelutils", "tests"]
+branch = true
+parallel = true
+omit = [
+  "src/hiermodelutils/__about__.py",
+]
+
+[tool.coverage.paths]
+hiermodelutils = ["src/hiermodelutils", "*/hiermodelutils/src/hiermodelutils"]
+tests = ["tests", "*/hiermodelutils/tests"]
+
+[tool.coverage.report]
+exclude_lines = [
+  "no cov",
+  "if __name__ == .__main__.:",
+  "if TYPE_CHECKING:",
 ]
