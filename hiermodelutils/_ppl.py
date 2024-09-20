@@ -1,3 +1,5 @@
+__all__ = ['get_logdensities_and_transforms_from_numpyro', 'get_generative_model']
+
 import jax.random as jr
 from numpyro.infer.util import initialize_model
 from typing import NamedTuple
@@ -58,7 +60,7 @@ def get_generative_model(
     To work properly, the prior and likelihood functions must follow the pattern:
     
     ```python
-    def prior(*args):
+    def prior(*args, **kwargs) -> dict:
         # Sample parameters
         x = numpyro.sample(...)
         y = numpyro.sample(...)
@@ -67,7 +69,7 @@ def get_generative_model(
         # Return all parameters in a dictionary
         return latents
     
-    def likelihood(params, *args):
+    def likelihood(params, *args, **kwargs):
         # Retrieve prior samples of parameters
         x = params["x"]
         y = params["y"]
@@ -97,6 +99,8 @@ def get_generative_model(
         A named tuple containing the prior, likelihood, and joint log densities and transforms.
     """
     prior_info = get_logdensities_and_transforms_from_numpyro(prior, prior_args, prior_kwargs)
+    # likelihood_info = get_logdensities_and_transforms_from_numpyro(likelihood, likelihood_args, likelihood_kwargs, is_conditional_model=True, prior_postprocess_fn=prior_info.postprocess_fn, prior_init_params=prior_info.init_params.z)
+    # prior_output = prior(*prior_args, **prior_kwargs)
     likelihood_info = get_logdensities_and_transforms_from_numpyro(likelihood, likelihood_args, likelihood_kwargs, is_conditional_model=True, prior_postprocess_fn=prior_info.postprocess_fn, prior_init_params=prior_info.init_params.z)
     def joint(*args, **kwargs):
         params = prior(*args[0], **args[1])

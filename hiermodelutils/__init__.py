@@ -13,3 +13,4 @@ from ._param import *
 from ._distributions import *
 from ._plotting import *
 from ._flatten import *
+from ._ppl import *
