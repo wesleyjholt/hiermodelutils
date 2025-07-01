@@ -24,7 +24,8 @@ def _get_full_and_extra_shape(
 def _insert_dims_into_array(
     array: Shaped[ArrayLike, "..."],
     mask_shape: tuple[int, ...],
-    ignore_ndim: int
+    ignore_ndim: int,
+    make_jax_traceable: bool
 ) -> Shaped[Array, "..."]:
     if (ignore_ndim < 0) or (ignore_ndim > array.ndim):
         raise ValueError(f"ignore_ndim must be between 0 and {array.ndim}.")
@@ -33,13 +34,17 @@ def _insert_dims_into_array(
         non_ignored_shape = array.shape[ignore_ndim:]
         if len(non_ignored_shape) <= len(mask_shape):
             n_insert = len(mask_shape) - len(non_ignored_shape)
-            array = jnp.expand_dims(array, axis=tuple(range(ignore_ndim, ignore_ndim + n_insert)))
+            if make_jax_traceable:
+                array = jnp.expand_dims(array, axis=tuple(range(ignore_ndim, ignore_ndim + n_insert)))
+            else:
+                array = np.expand_dims(array, axis=tuple(range(ignore_ndim, ignore_ndim + n_insert)))
     return array
 
 def flatten_and_condense(
     array: Shaped[ArrayLike, "..."], 
     mask: Bool[np.ndarray, "..."], 
-    ignore_ndim: Optional[int] = 0
+    ignore_ndim: Optional[int] = 0,
+    make_jax_traceable: bool = True
 ) -> Shaped[Array, "..."]:
     """Flattens an array (up to certain dim) and removes all values where mask=True.
     
@@ -65,13 +70,17 @@ def flatten_and_condense(
     """
     array = _insert_dims_into_array(array, mask.shape, ignore_ndim)
     full_shape, extra_shape = _get_full_and_extra_shape(array.shape, mask.shape)
-    array = jnp.broadcast_to(array, full_shape)
+    if make_jax_traceable:
+        array = jnp.broadcast_to(array, full_shape)
+    else:
+        array = np.broadcast_to(array, full_shape)
     mask = np.broadcast_to(mask, full_shape)
     return array[~np.full(full_shape, mask)].reshape(*extra_shape, -1)
 
 def unflatten_and_expand(
     array: Shaped[ArrayLike, "..."], 
     mask: Bool[np.ndarray, "..."], 
+    make_jax_traceable: bool = True
 ) -> Shaped[Array, "..."]:
     """Expands and unflattens an array.
     
@@ -95,4 +104,7 @@ def unflatten_and_expand(
     elif array.ndim > 1:
         new_shape = (*array.shape[:array.ndim - 1], *mask.shape)
     
-    return jnp.einsum('ij,...i->...j', M, array).reshape(new_shape)
+    if make_jax_traceable:
+        return jnp.einsum('ij,...i->...j', M, array).reshape(new_shape)
+    else:
+        return np.einsum('ij,...i->...j', M, array).reshape(new_shape)
