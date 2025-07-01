@@ -68,7 +68,7 @@ def flatten_and_condense(
     :param mask: Mask to apply to the array.
     :return: Condensed array.
     """
-    array = _insert_dims_into_array(array, mask.shape, ignore_ndim)
+    array = _insert_dims_into_array(array, mask.shape, ignore_ndim, make_jax_traceable)
     full_shape, extra_shape = _get_full_and_extra_shape(array.shape, mask.shape)
     if make_jax_traceable:
         array = jnp.broadcast_to(array, full_shape)
